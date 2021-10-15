@@ -52,3 +52,17 @@ module "rds" {
   subnets_ids = module.vpc.database_subnets_ids
   security_groups = [module.security_groups.rds]
 }
+
+module "s3" {
+  source = "./s3"
+
+  owner = var.owner
+}
+
+module "iam" {
+  source = "./iam"
+
+  aws_region = var.aws_region
+  bucket_arn = module.s3.bucket_arn
+  owner      = var.owner
+}

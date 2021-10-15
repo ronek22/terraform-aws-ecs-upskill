@@ -22,38 +22,39 @@ resource "aws_db_instance" "main" {
   allocated_storage      = 10
   engine                 = "postgres"
   instance_class         = "db.t3.micro"
-  identifier = "${var.owner}-db"
+  identifier             = "${var.owner}-db"
   username               = "postgres"
   password               = random_password.db_master_pass.result
   multi_az               = true
   db_subnet_group_name   = aws_db_subnet_group.main.name
   vpc_security_group_ids = var.security_groups
-  skip_final_snapshot = true
+  skip_final_snapshot    = true
 
   tags = {
-    Name = "${var.owner}-db"
+    Name  = "${var.owner}-db"
     Owner = var.owner
   }
 }
 
 resource "aws_ssm_parameter" "db_user" {
-  name = "/${var.owner}/database/username"
+  name        = "/${var.owner}/database/username"
   description = "Database username"
-  type = "SecureString"
-  value = aws_db_instance.main.username
+  type        = "SecureString"
+  value       = aws_db_instance.main.username
 }
 
 resource "aws_ssm_parameter" "db_pass" {
-  name = "/${var.owner}/database/password"
+  name        = "/${var.owner}/database/password"
   description = "Database password"
-  type = "SecureString"
-  value = aws_db_instance.main.password
+  type        = "SecureString"
+  value       = aws_db_instance.main.password
 }
 
 resource "aws_ssm_parameter" "db_host" {
-  name = "/${var.owner}/database/host"
+  name        = "/${var.owner}/database/host"
   description = "Database host"
-  type = "SecureString"
-  value = aws_db_instance.main.address
+  type        = "SecureString"
+  value       = aws_db_instance.main.address
 }
+
 
