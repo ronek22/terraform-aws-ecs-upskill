@@ -47,9 +47,9 @@ module "bastion" {
 }
 
 module "rds" {
-  source = "./rds"
-  owner  = var.owner
-  subnets_ids = module.vpc.database_subnets_ids
+  source          = "./rds"
+  owner           = var.owner
+  subnets_ids     = module.vpc.database_subnets_ids
   security_groups = [module.security_groups.rds]
 }
 
@@ -65,4 +65,38 @@ module "iam" {
   aws_region = var.aws_region
   bucket_arn = module.s3.bucket_arn
   owner      = var.owner
+}
+
+
+module "ecs" {
+
+  source = "./ecs"
+  owner  = var.owner
+
+  container_cpu      = var.container_cpu
+  container_memory   = var.container_memory
+  execution_role_arn = module.iam.ecs_task_execution_role_arn
+
+  db_app_version          = "1.0.0"
+  db_app_environment      = ""
+  db_app_repository_url   = module.ecr.db_app_repository_url
+  db_nginx_repository_url = module.ecr.db_nginx_repository_url
+
+  s3_app_version          = "1.0.0"
+  s3_app_environment      = ""
+  s3_app_repository_url   = module.ecr.s3_app_repository_url
+  s3_nginx_repository_url = module.ecr.s3_nginx_repository_url
+
+  s3_app_security_group = ""
+  s3_app_subnet         = ""
+  s3_desired_count      = 2
+  s3_target_group       = ""
+  s3_task_role_arn      = module.iam.ecs_task_role_arn
+  s3_bucket_name        = module.s3.bucket_name
+
+  db_name_arn     = module.rds.db_name_arn
+  db_host_arn     = module.rds.db_host_arn
+  db_password_arn = module.rds.db_password_arn
+  db_port_arn     = module.rds.db_port_arn
+  db_user_arn     = module.rds.db_user_arn
 }

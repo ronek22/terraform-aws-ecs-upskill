@@ -23,6 +23,7 @@ resource "aws_db_instance" "main" {
   engine                 = "postgres"
   instance_class         = "db.t3.micro"
   identifier             = "${var.owner}-db"
+  name                   = "postgres"
   username               = "postgres"
   password               = random_password.db_master_pass.result
   multi_az               = true
@@ -34,6 +35,13 @@ resource "aws_db_instance" "main" {
     Name  = "${var.owner}-db"
     Owner = var.owner
   }
+}
+
+resource "aws_ssm_parameter" "db_name" {
+  name        = "/${var.owner}/database/name"
+  description = "Database name"
+  type        = "SecureString"
+  value       = aws_db_instance.main.name
 }
 
 resource "aws_ssm_parameter" "db_user" {
@@ -55,6 +63,33 @@ resource "aws_ssm_parameter" "db_host" {
   description = "Database host"
   type        = "SecureString"
   value       = aws_db_instance.main.address
+}
+
+resource "aws_ssm_parameter" "db_port" {
+  name        = "/${var.owner}/database/port"
+  description = "Database port"
+  type        = "SecureString"
+  value       = aws_db_instance.main.port
+}
+
+output "db_name_arn" {
+  value = aws_ssm_parameter.db_name.arn
+}
+
+output "db_user_arn" {
+  value = aws_ssm_parameter.db_user.arn
+}
+
+output "db_password_arn" {
+  value = aws_ssm_parameter.db_pass.arn
+}
+
+output "db_host_arn" {
+  value = aws_ssm_parameter.db_host.arn
+}
+
+output "db_port_arn" {
+  value = aws_ssm_parameter.db_port.arn
 }
 
 

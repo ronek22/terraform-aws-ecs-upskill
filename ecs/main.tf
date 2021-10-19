@@ -1,3 +1,22 @@
+resource "random_password" "django_secret_key" {
+  length           = 50
+  special          = true
+  min_special      = 5
+  override_special = "!#$%^&*()-_=+[]{}<>:?"
+  keepers          = {
+    pass_version = 1
+  }
+}
+
+# PUT SECRET KEY IN PARAMETER STORE INSTEAD SHOW IT EXPLICITLY IN TASK DEFINITION
+
+resource "aws_ssm_parameter" "django_secret_key" {
+  name        = "/${var.owner}/dbapp/secret"
+  description = "Secret Key for CRUD app"
+  type        = "SecureString"
+  value       = random_password.django_secret_key.result
+}
+
 resource "aws_ecs_task_definition" "s3_app" {
   family                   = "${var.owner}-task-s3-app"
   network_mode             = "awsvpc"
@@ -5,39 +24,22 @@ resource "aws_ecs_task_definition" "s3_app" {
   cpu                      = var.container_cpu
   memory                   = var.container_memory
   execution_role_arn       = var.execution_role_arn
-  task_role_arn            = var.task_role_arn
-  container_definitions    = jsonencode([
-    {
-      name         = "app",
-      image        = "${var.s3_app_repository_url}:${var.s3-app-version}"
-      essential    = true
-      environment  = var.s3_app_environment
-      portMappings = [
-        {
-          protocol       = "tcp"
-          container_port = 5000
-        }
-      ]
-    },
-    {
-      name         = "nginx"
-      image        = "${var.s3_nginx_repository_url}:${var.s3-app-version}"
-      essential    = true
-      portMappings = [
-        {
-          protocol       = "tcp"
-          container_port = 80
-          host_port      = 80
-        }
-      ]
-    }
-  ])
+  task_role_arn            = var.s3_task_role_arn
+  container_definitions    = templatefile("./task_definitions/s3_service.json", {
+    app_repository_url   = var.s3_app_repository_url,
+    app_version          = var.s3_app_version,
+    bucket_name          = var.s3_bucket_name,
+    service_discovery    = "localhost", # TODO: service discovery dns
+    nginx_repository_url = var.s3_nginx_repository_url
+  })
+
 
   tags = {
     Name  = "${var.owner}-task-s3-app"
     Owner = var.owner
   }
 }
+
 
 
 resource "aws_ecs_task_definition" "db_app" {
@@ -47,32 +49,17 @@ resource "aws_ecs_task_definition" "db_app" {
   cpu                      = var.container_cpu
   memory                   = var.container_memory
   execution_role_arn       = var.execution_role_arn
-  container_definitions    = jsonencode([
-    {
-      name         = "app",
-      image        = "${var.db_app_repository_url}:${var.db-app-version}"
-      essential    = true
-      environment  = var.db_app_environment
-      portMappings = [
-        {
-          protocol       = "tcp"
-          container_port = 8000
-        }
-      ]
-    },
-    {
-      name         = "nginx"
-      image        = "${var.db_nginx_repository_url}:${var.db-app-version}"
-      essential    = true
-      portMappings = [
-        {
-          protocol       = "tcp"
-          container_port = 80
-          host_port      = 80
-        }
-      ]
-    }
-  ])
+  container_definitions    = templatefile("./task_definitions/db_service.json", {
+    app_repository_url   = var.db_app_repository_url,
+    app_version          = var.db_app_version,
+    nginx_repository_url = var.db_nginx_repository_url
+    secret_key           = aws_ssm_parameter.django_secret_key.arn,
+    db                   = var.db_name_arn,
+    db_user              = var.db_user_arn,
+    db_password          = var.db_password_arn,
+    db_host              = var.db_host_arn,
+    sql_port             = var.db_port_arn
+  })
 
   tags = {
     Name  = "${var.owner}-task-s3-app"

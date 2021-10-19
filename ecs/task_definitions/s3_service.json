@@ -1,0 +1,39 @@
+[
+  {
+    "name": "app",
+    "image": "${app_repository_url}:${app-version}",
+    "essential": true,
+    "Environment": [
+      {
+        "Name": "APP_ENV",
+        "Value": "Production"
+      },
+      {
+        "Name": "AWS_S3_BUCKET",
+        "Value": "${bucket_name}"
+      },
+      {
+        "Name": "DB_APP_URL",
+        "Value": "${service_discovery}/db"
+      }
+    ],
+    "portMappings": [
+      {
+        "protocol": "tcp",
+        "container_port": 5000
+      }
+    ]
+  },
+  {
+    "name": "nginx",
+    "image": "${nginx_repository_url}:${app-version}",
+    "essential": true,
+    "portMappings": [
+      {
+        "protocol": "tcp",
+        "container_port": 80,
+        "host_port": 80
+      }
+    ]
+  }
+]

@@ -1,3 +1,5 @@
+# VPC
+
 variable "aws_region" {
   description = "The AWS region to deploy the resources into."
   default     = "eu-west-2"
@@ -38,11 +40,14 @@ variable "availability_zones" {
   default     = ["eu-west-2a", "eu-west-2b"]
 }
 
+# ECR
+
 variable "repositories" {
   description = "List of repositories"
   default     = ["db-app", "db-nginx", "s3-app", "s3-nginx"]
 }
 
+# TARGET GROUPS
 
 variable "target_groups" {
   description = "List of target group names"
@@ -54,13 +59,27 @@ variable "health_check_paths" {
   default     = ["/db/health/", "/s3/health"]
 }
 
+# BASTION
+
 variable "instance_type" {
   description = "Instance Type for EC2"
-  default = "t2.micro"
+  default     = "t2.micro"
 }
 
 variable "key_name" {
   description = "Key name for SSH access"
-  default = "upskill_key"
+  default     = "upskill_key"
+}
+
+# ECS
+
+variable "container_cpu" {
+  description = "How much CPU would be used by container"
+  default     = 256
+}
+
+variable "container_memory" {
+  description = "How much memory would be used by container"
+  default     = 512
 }
 

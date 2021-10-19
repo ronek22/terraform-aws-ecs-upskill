@@ -1,0 +1,67 @@
+[
+  {
+    "name": "app",
+    "image": "${app_repository_url}:${app_version}",
+    "essential": true,
+    "Environment": [
+      {
+        "Name": "DEBUG",
+        "Value": 0
+      },
+      {
+        "Name": "DJANGO_ALLOWED_HOSTS",
+        "Value": "*"
+      },
+      {
+        "Name": "DATABASE",
+        "Value": "postgres"
+      },
+      {
+        "Name": "SQL_ENGINE",
+        "Value": "django.db.backends.postgresql"
+      },
+      {
+        "Name": "SECRET_KEY",
+        "ValueFrom": "${secret_key}"
+      },
+      {
+        "Name": "SQL_DATABASE",
+        "ValueFrom": "${db}"
+      },
+      {
+        "Name": "SQL_USER",
+        "ValueFrom": "${db_user}"
+      },
+      {
+        "Name": "SQL_PASSWORD",
+        "ValueFrom": "${db_password}"
+      },
+      {
+        "Name": "SQL_HOST",
+        "ValueFrom": "${db_host}"
+      },
+      {
+        "Name": "SQL_PORT",
+        "ValueFrom": "${sql_port}"
+      }
+    ],
+    "portMappings": [
+      {
+        "protocol": "tcp",
+        "container_port": 8000
+      }
+    ]
+  },
+  {
+    "name": "nginx",
+    "image": "${nginx_repository_url}:${app_version}",
+    "essential": true,
+    "portMappings": [
+      {
+        "protocol": "tcp",
+        "container_port": 80,
+        "host_port": 80
+      }
+    ]
+  }
+]

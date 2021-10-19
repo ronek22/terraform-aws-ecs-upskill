@@ -1,22 +1,25 @@
 variable "container_cpu" {
   description = "How much CPU would be used by container"
 }
-variable "owner" {
-  description = "Owner of infra"
-}
+
 variable "container_memory" {
   description = "How much memory would be used by container"
 }
+
+variable "owner" {
+  description = "Owner of infra"
+}
+
 variable "execution_role_arn" {
   description = "Task execution role arn for ECS"
 }
-variable "task_role_arn" {
+variable "s3_task_role_arn" {
   description = "Task role for S3 APP"
 }
 variable "s3_app_repository_url" {
   description = "S3 APP Repository"
 }
-variable "s3-app-version" {
+variable "s3_app_version" {
   description = "Image version of S3 App"
 }
 variable "s3_app_environment" {
@@ -24,6 +27,10 @@ variable "s3_app_environment" {
 }
 variable "s3_nginx_repository_url" {
   description = "S3 Nginx Repository"
+}
+
+variable "s3_bucket_name" {
+  description = "S3 Bucket Name"
 }
 
 variable "s3_desired_count" {
@@ -42,7 +49,7 @@ variable "s3_target_group" {
 variable "db_app_repository_url" {
   description = "Repository for DB app"
 }
-variable "db-app-version" {
+variable "db_app_version" {
   description = "Image version for DB app"
 }
 variable "db_app_environment" {
@@ -50,4 +57,24 @@ variable "db_app_environment" {
 }
 variable "db_nginx_repository_url" {
   description = "Image version for Db nginx"
+}
+
+variable "db_name_arn" {
+  default = "Database name ARN from Parameter Store"
+}
+
+variable "db_host_arn" {
+  description = "Database host ARN from Parameter Store"
+}
+
+variable "db_user_arn" {
+  description = "Database user ARN from Parameter Store"
+}
+
+variable "db_password_arn" {
+  description = "Database password ARN from Parameter Store"
+}
+
+variable "db_port_arn" {
+  description = "Database port ARN from Parameter Store"
 }
