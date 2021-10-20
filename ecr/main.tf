@@ -33,17 +33,17 @@ resource "aws_ecr_lifecycle_policy" "main" {
 }
 
 output "db_app_repository_url" {
-  value = aws_ecr_repository.main.0
+  value = aws_ecr_repository.main.0.repository_url
 }
 
 output "db_nginx_repository_url" {
-  value = aws_ecr_repository.main.1
+  value = aws_ecr_repository.main.1.repository_url
 }
 
 output "s3_app_repository_url" {
-  value = aws_ecr_repository.main.2
+  value = aws_ecr_repository.main.2.repository_url
 }
 
 output "s3_nginx_repository_url" {
-  value = aws_ecr_repository.main.3
+  value = aws_ecr_repository.main.3.repository_url
 }

@@ -25,7 +25,8 @@ resource "aws_ecs_task_definition" "s3_app" {
   memory                   = var.container_memory
   execution_role_arn       = var.execution_role_arn
   task_role_arn            = var.s3_task_role_arn
-  container_definitions    = templatefile("./task_definitions/s3_service.json", {
+
+  container_definitions = templatefile("${path.module}/task_definitions/s3_service.json", {
     app_repository_url   = var.s3_app_repository_url,
     app_version          = var.s3_app_version,
     bucket_name          = var.s3_bucket_name,
@@ -41,7 +42,6 @@ resource "aws_ecs_task_definition" "s3_app" {
 }
 
 
-
 resource "aws_ecs_task_definition" "db_app" {
   family                   = "${var.owner}-task-db-app"
   network_mode             = "awsvpc"
@@ -49,7 +49,8 @@ resource "aws_ecs_task_definition" "db_app" {
   cpu                      = var.container_cpu
   memory                   = var.container_memory
   execution_role_arn       = var.execution_role_arn
-  container_definitions    = templatefile("./task_definitions/db_service.json", {
+
+  container_definitions = templatefile("${path.module}/task_definitions/db_service.json", {
     app_repository_url   = var.db_app_repository_url,
     app_version          = var.db_app_version,
     nginx_repository_url = var.db_nginx_repository_url
@@ -60,6 +61,10 @@ resource "aws_ecs_task_definition" "db_app" {
     db_host              = var.db_host_arn,
     sql_port             = var.db_port_arn
   })
+
+  volume {
+    name = "static_volume"
+  }
 
   tags = {
     Name  = "${var.owner}-task-s3-app"
@@ -76,26 +81,53 @@ resource "aws_ecs_cluster" "main" {
 }
 
 
+resource "aws_ecs_service" "db" {
+  name                               = "${var.owner}-db-app-service"
+  cluster                            = aws_ecs_cluster.main.id
+  task_definition                    = aws_ecs_task_definition.db_app.arn
+  desired_count                      = var.db_app_desired_count
+  deployment_minimum_healthy_percent = 50
+  deployment_maximum_percent         = 200
+  health_check_grace_period_seconds  = 60
+  launch_type                        = "FARGATE"
+  scheduling_strategy                = "REPLICA"
+  platform_version                   = "1.3.0"
+
+  network_configuration {
+    security_groups  = var.db_app_security_group
+    subnets          = var.app_subnets
+    assign_public_ip = false
+  }
+
+  load_balancer {
+    target_group_arn = var.db_target_group
+    container_name   = "nginx"
+    container_port   = 80
+  }
+
+}
+
+
 resource "aws_ecs_service" "s3" {
-  name                              = "${var.owner}-s3-service"
-  cluster                           = aws_ecs_cluster.main
-  task_definition                   = aws_ecs_task_definition.s3_app.arn
-  desired_count                     = var.s3_desired_count
-  deployment_minimum_health_percent = 50
-  deployment_maximum_percent        = 200
-  health_check_grace_period_seconds = 60
-  launch_type                       = "FARGATE"
-  scheduling_strategy               = "REPLICA"
+  name                               = "${var.owner}-s3-service"
+  cluster                            = aws_ecs_cluster.main.id
+  task_definition                    = aws_ecs_task_definition.s3_app.arn
+  desired_count                      = var.s3_desired_count
+  deployment_minimum_healthy_percent = 50
+  deployment_maximum_percent         = 200
+  health_check_grace_period_seconds  = 60
+  launch_type                        = "FARGATE"
+  scheduling_strategy                = "REPLICA"
 
   network_configuration {
     security_groups  = var.s3_app_security_group
-    subnets          = var.s3_app_subnet
+    subnets          = var.app_subnets
     assign_public_ip = false
   }
 
   load_balancer {
     target_group_arn = var.s3_target_group
-    container_name   = "app"
+    container_name   = "nginx"
     container_port   = 80
   }
 

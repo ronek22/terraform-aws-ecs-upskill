@@ -1,8 +1,9 @@
 [
   {
     "name": "app",
-    "image": "${app_repository_url}:${app-version}",
+    "image": "${app_repository_url}:${app_version}",
     "essential": true,
+    "workingDirectory": "/flask-deploy",
     "Environment": [
       {
         "Name": "APP_ENV",
@@ -20,20 +21,29 @@
     "portMappings": [
       {
         "protocol": "tcp",
-        "container_port": 5000
+        "containerPort": 5000
       }
     ]
   },
   {
     "name": "nginx",
-    "image": "${nginx_repository_url}:${app-version}",
+    "image": "${nginx_repository_url}:${app_version}",
     "essential": true,
     "portMappings": [
       {
         "protocol": "tcp",
-        "container_port": 80,
-        "host_port": 80
+        "containerPort": 80
       }
-    ]
+    ],
+    "healthCheck": {
+      "retries": 3,
+      "command": [
+        "CMD-SHELL",
+        "curl -f http://localhost/s3/health || exit 1"
+      ],
+      "timeout": 5,
+      "interval": 30,
+      "startPeriod": 300
+    }
   }
 ]

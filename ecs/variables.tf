@@ -13,6 +13,11 @@ variable "owner" {
 variable "execution_role_arn" {
   description = "Task execution role arn for ECS"
 }
+
+variable "app_subnets" {
+  description = "Subnets for apps"
+}
+
 variable "s3_task_role_arn" {
   description = "Task role for S3 APP"
 }
@@ -22,9 +27,7 @@ variable "s3_app_repository_url" {
 variable "s3_app_version" {
   description = "Image version of S3 App"
 }
-variable "s3_app_environment" {
-  description = "Env variables for S3 App"
-}
+
 variable "s3_nginx_repository_url" {
   description = "S3 Nginx Repository"
 }
@@ -39,11 +42,13 @@ variable "s3_desired_count" {
 variable "s3_app_security_group" {
   description = "Security Group for S3 App"
 }
-variable "s3_app_subnet" {
-  description = "Subnets for S3 App"
-}
+
 variable "s3_target_group" {
   description = "Target Group for S3 App"
+}
+
+variable "db_target_group" {
+  description = "Target Group for DB App"
 }
 
 variable "db_app_repository_url" {
@@ -52,9 +57,15 @@ variable "db_app_repository_url" {
 variable "db_app_version" {
   description = "Image version for DB app"
 }
-variable "db_app_environment" {
-  description = "Env variables for DB app"
+
+variable "db_app_desired_count" {
+  description = "Desired Tasks in DB App Service"
 }
+
+variable "db_app_security_group" {
+  description = "Security group for DB App"
+}
+
 variable "db_nginx_repository_url" {
   description = "Image version for Db nginx"
 }

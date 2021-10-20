@@ -2,11 +2,19 @@
   {
     "name": "app",
     "image": "${app_repository_url}:${app_version}",
+    "workingDirectory": "/home/app/web",
     "essential": true,
+    "mountPoints": [
+      {
+        "readOnly": null,
+        "containerPath": "home/app/web/staticfiles",
+        "sourceVolume": "static_volume"
+      }
+    ],
     "Environment": [
       {
         "Name": "DEBUG",
-        "Value": 0
+        "Value": "0"
       },
       {
         "Name": "DJANGO_ALLOWED_HOSTS",
@@ -19,7 +27,9 @@
       {
         "Name": "SQL_ENGINE",
         "Value": "django.db.backends.postgresql"
-      },
+      }
+    ],
+    "secrets": [
       {
         "Name": "SECRET_KEY",
         "ValueFrom": "${secret_key}"
@@ -48,7 +58,7 @@
     "portMappings": [
       {
         "protocol": "tcp",
-        "container_port": 8000
+        "containerPort": 8000
       }
     ]
   },
@@ -59,9 +69,25 @@
     "portMappings": [
       {
         "protocol": "tcp",
-        "container_port": 80,
-        "host_port": 80
+        "containerPort": 80
       }
-    ]
+    ],
+    "mountPoints": [
+      {
+        "readOnly": true,
+        "containerPath": "/home/app/web/staticfiles",
+        "sourceVolume": "static_volume"
+      }
+    ],
+    "healthCheck": {
+      "retries": 3,
+      "command": [
+        "CMD-SHELL",
+        "curl -f http://localhost/db/health/ || exit 1"
+      ],
+      "timeout": 5,
+      "interval": 30,
+      "startPeriod": 300
+    }
   }
 ]
