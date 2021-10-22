@@ -7,7 +7,7 @@
     "mountPoints": [
       {
         "readOnly": null,
-        "containerPath": "home/app/web/staticfiles",
+        "containerPath": "/home/app/web/staticfiles",
         "sourceVolume": "static_volume"
       }
     ],

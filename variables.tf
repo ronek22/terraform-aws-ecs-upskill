@@ -83,3 +83,13 @@ variable "container_memory" {
   default     = 512
 }
 
+# APPLICATION VERSIONS
+
+variable "db_app_version" {
+  description = "DB App version"
+}
+
+variable "s3_app_version" {
+  description = "S3 App version"
+}
+

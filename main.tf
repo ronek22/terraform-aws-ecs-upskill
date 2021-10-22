@@ -68,9 +68,6 @@ module "iam" {
 }
 
 
-
-
-
 module "ecs" {
 
   source = "./ecs"
@@ -82,7 +79,7 @@ module "ecs" {
   app_subnets        = module.vpc.app_subnets_ids
 
 
-  db_app_version          = "1.0.0"
+  db_app_version          = var.db_app_version
   db_app_repository_url   = module.ecr.db_app_repository_url
   db_nginx_repository_url = module.ecr.db_nginx_repository_url
 
@@ -96,7 +93,7 @@ module "ecs" {
   db_app_security_group = [module.security_groups.db_app]
   db_target_group       = module.alb.db_app_target_group_arn
 
-  s3_app_version          = "1.0.0"
+  s3_app_version          = var.s3_app_version
   s3_app_repository_url   = module.ecr.s3_app_repository_url
   s3_nginx_repository_url = module.ecr.s3_nginx_repository_url
 
@@ -107,19 +104,6 @@ module "ecs" {
   s3_bucket_name        = module.s3.bucket_name
 }
 
-
-output "db_app_repository_url" {
-  value = module.ecr.db_app_repository_url
-}
-
-output "db_nginx_repository_url" {
-  value = module.ecr.db_nginx_repository_url
-}
-
-output "s3_app_repository_url" {
-  value = module.ecr.s3_app_repository_url
-}
-
-output "s3_nginx_repository_url" {
-  value = module.ecr.s3_nginx_repository_url
+output "alb_url" {
+  value = module.alb.alb_dns_url
 }

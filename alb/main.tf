@@ -39,8 +39,8 @@ resource "aws_lb_target_group" "main" {
 
 resource "aws_lb_listener" "http" {
   load_balancer_arn = aws_lb.main.id
-  port = 80
-  protocol = "HTTP"
+  port              = 80
+  protocol          = "HTTP"
 
   default_action {
     type = "fixed-response"
@@ -48,7 +48,7 @@ resource "aws_lb_listener" "http" {
     fixed_response {
       content_type = "text/plain"
       message_body = "404 Not Found"
-      status_code = 404
+      status_code  = 404
     }
   }
 }
@@ -56,10 +56,10 @@ resource "aws_lb_listener" "http" {
 resource "aws_lb_listener_rule" "db" {
 
   listener_arn = aws_lb_listener.http.arn
-  priority = 100
+  priority     = 100
 
   action {
-    type = "forward"
+    type             = "forward"
     target_group_arn = aws_lb_target_group.main.0.arn
   }
   condition {
@@ -72,10 +72,10 @@ resource "aws_lb_listener_rule" "db" {
 resource "aws_lb_listener_rule" "s3" {
 
   listener_arn = aws_lb_listener.http.arn
-  priority = 200
+  priority     = 200
 
   action {
-    type = "forward"
+    type             = "forward"
     target_group_arn = aws_lb_target_group.main.1.arn
   }
   condition {
@@ -91,4 +91,8 @@ output "db_app_target_group_arn" {
 
 output "s3_app_target_group_arn" {
   value = aws_lb_target_group.main.1.arn
+}
+
+output "alb_dns_url" {
+  value = aws_lb.main.dns_name
 }

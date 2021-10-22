@@ -28,10 +28,10 @@ resource "aws_ecs_task_definition" "s3_app" {
 
   container_definitions = templatefile("${path.module}/task_definitions/s3_service.json", {
     app_repository_url   = var.s3_app_repository_url,
+    nginx_repository_url = var.s3_nginx_repository_url
     app_version          = var.s3_app_version,
     bucket_name          = var.s3_bucket_name,
     service_discovery    = "localhost", # TODO: service discovery dns
-    nginx_repository_url = var.s3_nginx_repository_url
   })
 
 
@@ -52,8 +52,8 @@ resource "aws_ecs_task_definition" "db_app" {
 
   container_definitions = templatefile("${path.module}/task_definitions/db_service.json", {
     app_repository_url   = var.db_app_repository_url,
-    app_version          = var.db_app_version,
     nginx_repository_url = var.db_nginx_repository_url
+    app_version          = var.db_app_version,
     secret_key           = aws_ssm_parameter.django_secret_key.arn,
     db                   = var.db_name_arn,
     db_user              = var.db_user_arn,
