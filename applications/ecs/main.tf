@@ -131,7 +131,7 @@ resource "aws_ecs_service" "db" {
   task_definition                    = aws_ecs_task_definition.db_app.arn
   desired_count                      = var.db_app_desired_count
   deployment_minimum_healthy_percent = 50
-  deployment_maximum_percent         = 200
+  deployment_maximum_percent         = 100
   health_check_grace_period_seconds  = 60
   launch_type                        = "FARGATE"
   scheduling_strategy                = "REPLICA"
@@ -158,7 +158,7 @@ resource "aws_ecs_service" "s3" {
   task_definition                    = aws_ecs_task_definition.s3_app.arn
   desired_count                      = var.s3_desired_count
   deployment_minimum_healthy_percent = 50
-  deployment_maximum_percent         = 200
+  deployment_maximum_percent         = 100
   health_check_grace_period_seconds  = 60
   launch_type                        = "FARGATE"
   scheduling_strategy                = "REPLICA"
