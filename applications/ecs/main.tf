@@ -9,13 +9,51 @@ resource "random_password" "django_secret_key" {
 }
 
 # PUT SECRET KEY IN PARAMETER STORE INSTEAD SHOW IT EXPLICITLY IN TASK DEFINITION
-
 resource "aws_ssm_parameter" "django_secret_key" {
   name        = "/${var.owner}/dbapp/secret"
   description = "Secret Key for CRUD app"
   type        = "SecureString"
   value       = random_password.django_secret_key.result
 }
+
+# LOG GROUPS
+resource "aws_cloudwatch_log_group" "s3_app" {
+  name = "/ecs/${var.owner}-task-s3-app"
+
+  tags = {
+    Name  = "${var.owner}-task-s3-app"
+    Owner = var.owner
+  }
+}
+
+resource "aws_cloudwatch_log_group" "s3_nginx" {
+  name = "/ecs/${var.owner}-task-s3-nginx"
+
+  tags = {
+    Name  = "${var.owner}-task-s3-nginx"
+    Owner = var.owner
+  }
+}
+
+resource "aws_cloudwatch_log_group" "db_app" {
+  name = "/ecs/${var.owner}-task-db-app"
+
+  tags = {
+    Name  = "${var.owner}-task-db-app"
+    Owner = var.owner
+  }
+}
+
+resource "aws_cloudwatch_log_group" "db_nginx" {
+  name = "/ecs/${var.owner}-task-db-nginx"
+
+  tags = {
+    Name  = "${var.owner}-task-db-nginx"
+    Owner = var.owner
+  }
+}
+
+# TASK DEFINITIONS
 
 resource "aws_ecs_task_definition" "s3_app" {
   family                   = "${var.owner}-task-s3-app"
@@ -32,6 +70,9 @@ resource "aws_ecs_task_definition" "s3_app" {
     app_version          = var.s3_app_version,
     bucket_name          = var.s3_bucket_name,
     service_discovery    = "localhost", # TODO: service discovery dns
+    app_log_group        = aws_cloudwatch_log_group.s3_app.name
+    nginx_log_group      = aws_cloudwatch_log_group.s3_nginx.name
+    region               = var.aws_region
   })
 
 
@@ -60,6 +101,9 @@ resource "aws_ecs_task_definition" "db_app" {
     db_password          = var.db_password_arn,
     db_host              = var.db_host_arn,
     sql_port             = var.db_port_arn
+    app_log_group        = aws_cloudwatch_log_group.db_app.name
+    nginx_log_group      = aws_cloudwatch_log_group.db_nginx.name
+    region               = var.aws_region
   })
 
   volume {

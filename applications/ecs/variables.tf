@@ -89,3 +89,7 @@ variable "db_password_arn" {
 variable "db_port_arn" {
   description = "Database port ARN from Parameter Store"
 }
+
+variable "aws_region" {
+  description = "The AWS region to deploy the resources into."
+}

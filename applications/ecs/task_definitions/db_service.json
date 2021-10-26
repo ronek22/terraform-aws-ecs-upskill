@@ -11,6 +11,14 @@
         "sourceVolume": "static_volume"
       }
     ],
+    "logConfiguration": {
+      "logDriver": "awslogs",
+      "options": {
+        "awslogs-group": "${app_log_group}",
+        "awslogs-stream-prefix": "ecs",
+        "awslogs-region": "${region}"
+      }
+    },
     "Environment": [
       {
         "Name": "DEBUG",
@@ -79,6 +87,14 @@
         "sourceVolume": "static_volume"
       }
     ],
+    "logConfiguration": {
+      "logDriver": "awslogs",
+      "options": {
+        "awslogs-group": "${nginx_log_group}",
+        "awslogs-stream-prefix": "ecs",
+        "awslogs-region": "${region}"
+      }
+    },
     "healthCheck": {
       "retries": 3,
       "command": [
