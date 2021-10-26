@@ -1,24 +1,15 @@
 # Terraform AWS ECS Upskill
 
-Before first run `terraform apply` you have to create four ECR repositories in region used in terraform using AWS CLI or Console with according names
-```
-owner - variable owner set in terraform
-Repository for CRUD APP GUNICORN
-{owner}-db-app 
-Repository for CRUD APP NGINX
-{owner}-db-nginx
-Repository for S3 APP GUNICORN
-{owner}-s3-app
-Repository for S# APP NGINX
-{owner}-s3-nginx
-```
+1. Run `terraform init` in both directories: `management` & `applications`
+2. Create ECR Repositories by running `terraform apply` in `management` directory
+3. Push images manually or through pipeline (Deployment Step)
+4. Then you can run `terraform apply` in `applications` directory
 
-~~And you have to push initial images to each repo with tag `latest` and optionally version tag~~
-
-Already implemented in CI/CD Pipelines in apps repos
-
+### Applications Repositories
+* [S3 App](https://github.com/ronek22/flask-s3-presigned-url)
+* [CRUD App](https://github.com/ronek22/activity-tracker)
 ---
 
-To rollback to previouse version of applications use:
+To roll back to previous version of applications run in `applications` directory:
 
-`terraform apply -var s3_app_version=<version>...`
+`terraform apply -var='s3_app_version=<version>' -var='db_app_version=<version>'`
