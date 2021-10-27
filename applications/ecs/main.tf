@@ -53,6 +53,33 @@ resource "aws_cloudwatch_log_group" "db_nginx" {
   }
 }
 
+# SERVICE DISCOVERY
+
+resource "aws_service_discovery_private_dns_namespace" "main" {
+  name        = "jronkiewicz.com"
+  description = "DNS Namespace for ECS Cluster"
+  vpc         = var.vpc_id
+}
+
+resource "aws_service_discovery_service" "db" {
+
+  name = "db"
+
+  dns_config {
+
+    namespace_id = aws_service_discovery_private_dns_namespace.main.id
+    dns_records {
+      ttl  = 10
+      type = "A"
+    }
+  }
+
+  health_check_custom_config {
+    failure_threshold = 1
+  }
+}
+
+
 # TASK DEFINITIONS
 
 resource "aws_ecs_task_definition" "s3_app" {
@@ -69,7 +96,7 @@ resource "aws_ecs_task_definition" "s3_app" {
     nginx_repository_url = var.s3_nginx_repository_url
     app_version          = var.s3_app_version,
     bucket_name          = var.s3_bucket_name,
-    service_discovery    = "localhost", # TODO: service discovery dns
+    service_discovery    = "${aws_service_discovery_service.db.name}.${aws_service_discovery_private_dns_namespace.main.name}"
     app_log_group        = aws_cloudwatch_log_group.s3_app.name
     nginx_log_group      = aws_cloudwatch_log_group.s3_nginx.name
     region               = var.aws_region
@@ -116,6 +143,9 @@ resource "aws_ecs_task_definition" "db_app" {
   }
 }
 
+
+# CLUSTER
+
 resource "aws_ecs_cluster" "main" {
   name = "${var.owner}-fargate-cluster"
   tags = {
@@ -125,13 +155,16 @@ resource "aws_ecs_cluster" "main" {
 }
 
 
+# ISSUE WITH ROLLING UPDATE
+# https://github.com/hashicorp/terraform/issues/11253#issuecomment-277418993
+
 resource "aws_ecs_service" "db" {
   name                               = "${var.owner}-db-app-service"
   cluster                            = aws_ecs_cluster.main.id
-  task_definition                    = aws_ecs_task_definition.db_app.arn
+  task_definition                    = "${aws_ecs_task_definition.db_app.family}:${aws_ecs_task_definition.db_app.revision}"
   desired_count                      = var.db_app_desired_count
   deployment_minimum_healthy_percent = 50
-  deployment_maximum_percent         = 100
+  deployment_maximum_percent         = 200
   health_check_grace_period_seconds  = 60
   launch_type                        = "FARGATE"
   scheduling_strategy                = "REPLICA"
@@ -141,6 +174,11 @@ resource "aws_ecs_service" "db" {
     security_groups  = var.db_app_security_group
     subnets          = var.app_subnets
     assign_public_ip = false
+  }
+
+  service_registries {
+    registry_arn   = aws_service_discovery_service.db.arn
+    container_name = "nginx"
   }
 
   load_balancer {
@@ -155,10 +193,10 @@ resource "aws_ecs_service" "db" {
 resource "aws_ecs_service" "s3" {
   name                               = "${var.owner}-s3-service"
   cluster                            = aws_ecs_cluster.main.id
-  task_definition                    = aws_ecs_task_definition.s3_app.arn
+  task_definition                    = "${aws_ecs_task_definition.s3_app.family}:${aws_ecs_task_definition.s3_app.revision}"
   desired_count                      = var.s3_desired_count
   deployment_minimum_healthy_percent = 50
-  deployment_maximum_percent         = 100
+  deployment_maximum_percent         = 200
   health_check_grace_period_seconds  = 60
   launch_type                        = "FARGATE"
   scheduling_strategy                = "REPLICA"
@@ -176,3 +214,4 @@ resource "aws_ecs_service" "s3" {
   }
 
 }
+

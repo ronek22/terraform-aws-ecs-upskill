@@ -15,7 +15,7 @@
       },
       {
         "Name": "DB_APP_URL",
-        "Value": "${service_discovery}/db"
+        "Value": "${service_discovery}"
       }
     ],
     "portMappings": [

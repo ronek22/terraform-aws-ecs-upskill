@@ -104,6 +104,7 @@ module "ecs" {
   s3_task_role_arn      = module.iam.ecs_task_role_arn
   s3_bucket_name        = module.s3.bucket_name
   aws_region            = var.aws_region
+  vpc_id                = module.vpc.id
 }
 
 output "alb_url" {

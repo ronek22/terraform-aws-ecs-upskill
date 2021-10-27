@@ -93,3 +93,7 @@ variable "db_port_arn" {
 variable "aws_region" {
   description = "The AWS region to deploy the resources into."
 }
+
+variable "vpc_id" {
+  description = "VPC ID"
+}
