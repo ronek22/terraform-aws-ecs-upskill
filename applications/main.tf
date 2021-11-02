@@ -107,6 +107,3 @@ module "ecs" {
   vpc_id                = module.vpc.id
 }
 
-output "alb_url" {
-  value = module.alb.alb_dns_url
-}

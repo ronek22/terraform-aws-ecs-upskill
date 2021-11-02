@@ -43,7 +43,7 @@ resource "aws_iam_policy" "s3bucket" {
   name        = "${var.owner}-task-policy-s3"
   description = "Policy that allows access to S3"
 
-  policy      = jsonencode({
+  policy = jsonencode({
     Version   = "2012-10-17",
     Statement = [
       {
@@ -89,12 +89,4 @@ resource "aws_iam_role_policy_attachment" "ecs-task-role-policy-attachment" {
   policy_arn = aws_iam_policy.s3bucket.arn
 }
 
-# OUTPUTS
 
-output "ecs_task_execution_role_arn" {
-  value = aws_iam_role.ecs_task_execution_role.arn
-}
-
-output "ecs_task_role_arn" {
-  value = aws_iam_role.ecs_task_role.arn
-}
