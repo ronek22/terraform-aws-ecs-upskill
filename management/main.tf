@@ -3,24 +3,13 @@ provider "aws" {
 }
 
 module "ecr" {
-
   source       = "./ecr"
   owner        = var.owner
   repositories = var.repositories
 }
 
-output "db_app_repository_name" {
-  value = module.ecr.db_app_repository_name
+module "state" {
+  source = "./state"
+  owner  = var.owner
 }
 
-output "db_nginx_repository_name" {
-  value = module.ecr.db_nginx_repository_name
-}
-
-output "s3_app_repository_name" {
-  value = module.ecr.s3_app_repository_name
-}
-
-output "s3_nginx_repository_name" {
-  value = module.ecr.s3_nginx_repository_name
-}
