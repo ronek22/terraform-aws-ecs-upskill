@@ -187,6 +187,11 @@ resource "aws_ecs_service" "db" {
     container_port   = 80
   }
 
+  # desired_count is ignored as it can change due to autoscaling policy
+  lifecycle {
+    ignore_changes = [desired_count]
+  }
+
 }
 
 
@@ -213,5 +218,33 @@ resource "aws_ecs_service" "s3" {
     container_port   = 80
   }
 
+
 }
+
+resource "aws_appautoscaling_target" "db_fargate" {
+  max_capacity = 4
+  min_capacity = 1
+  resource_id = "service/${aws_ecs_cluster.main.name}/${aws_ecs_service.db.name}"
+  scalable_dimension = "ecs:service:DesiredCount"
+  service_namespace = "ecs"
+}
+
+resource "aws_appautoscaling_policy" "db_fargate_cpu" {
+  name = "db-cpu-autoscaling"
+  policy_type = "TargetTrackingScaling"
+  resource_id        = aws_appautoscaling_target.db_fargate.resource_id
+  scalable_dimension = aws_appautoscaling_target.db_fargate.scalable_dimension
+  service_namespace  = aws_appautoscaling_target.db_fargate.service_namespace
+
+  target_tracking_scaling_policy_configuration {
+    predefined_metric_specification {
+      predefined_metric_type = "ECSServiceAverageCPUUtilization"
+    }
+
+    target_value = 60
+    scale_in_cooldown = 60
+    scale_out_cooldown = 60
+  }
+}
+
 
