@@ -13,3 +13,7 @@ module "state" {
   owner  = var.owner
 }
 
+module "self-hosted-runner" {
+  source = "./self-hosted-runner"
+  owner  = var.owner
+}

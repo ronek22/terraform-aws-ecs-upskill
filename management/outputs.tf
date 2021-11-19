@@ -21,3 +21,24 @@ output "state_bucket" {
 output "dynamodb_lock" {
   value = module.state.lock_table
 }
+
+output "secret_key" {
+  value = module.self-hosted-runner.secret_key
+  sensitive = true
+}
+
+output "access_key" {
+  value = module.self-hosted-runner.access_key
+}
+
+output "public_subnet_id" {
+  value = module.self-hosted-runner.public_subnet_id
+}
+
+output "private_subnet_id" {
+  value = module.self-hosted-runner.private_subnet_id
+}
+
+output "security_group_id" {
+  value = module.self-hosted-runner.security_group_id
+}
